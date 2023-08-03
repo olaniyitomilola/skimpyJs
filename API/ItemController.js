@@ -7,7 +7,7 @@ const {getAllItems,getSingleItem,addItem,editItem,deleteItem} = require('../pers
 
 router.route('/').get(getAllItems).post(addItem);
 
-router.route('/:id').get(getSingleItem);
+router.route('/:id').get(getSingleItem).delete(deleteItem);
 
 
 module.exports = router

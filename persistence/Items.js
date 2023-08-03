@@ -6,19 +6,22 @@ let items = [
         ,{name: "Nigerian Jollof Rice", price: 3, unit: "Spoon", img: "https://i.etsystatic.com/43736205/r/il/7a1cd7/5083482431/il_794xN.5083482431_aj9p.jpg"}
         ,{name: "Stirred Fried Rice", price: 3.5, unit: "Spoon", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA6F4LyczKxY_dkTpu6byAPDuxJqPHrWq4Zw&usqp=CAU"}
         ,{name: "Another Rice", price: 3.5, unit: "Spoon", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA6F4LyczKxY_dkTpu6byAPDuxJqPHrWq4Zw&usqp=CAU"}
+        ,{name: "Another Rice", price: 3.5, unit: "Spoon", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA6F4LyczKxY_dkTpu6byAPDuxJqPHrWq4Zw&usqp=CAU"}
+        ,null
+
 
 
 
     ]
 
-const getAllItems = async(req,res)=>{
+const getAllItems = async(req,res,next)=>{
     if(!items) return res.status(404).json({success : false, message : "Not Found"});
 
     return res.status(200).json(items)
 
 }
 
-const getSingleItem = async(req,res)=>{
+const getSingleItem = async(req,res,next)=>{
     let id = req.params.id;
     if(!items[parseInt(id)]) return res.status(404).json({success: false, message : `Item with id: ${id} does not exist`})
 
@@ -26,7 +29,7 @@ const getSingleItem = async(req,res)=>{
 
 }
 
-const addItem = async(req,res)=>{
+const addItem = async(req,res,next)=>{
     const item = req.body;
 
     if(!item.name || !item.price || !item.unit || !item.img) return res.status(400).json({success : false, message : "Invalid Input"})
@@ -34,10 +37,13 @@ const addItem = async(req,res)=>{
     return res.status(201).json(items);
 
 }
-const editItem = async(req,res)=>{
+const editItem = async(req,res,next)=>{
 
 }
-const deleteItem = async(req,res)=>{
+const deleteItem = async(req,res,next)=>{
+    let id = req.params.id;
+    items[parseInt(id)] = null;
+    return  res.status(201).json({message: "Item has been deleted",items})
 
 }
 
