@@ -1,3 +1,8 @@
+//Testing OS
+
+const os = require('os');
+const fs = require('fs')
+
 
 
 let items = [
@@ -16,6 +21,10 @@ let items = [
 
 const getAllItems = async(req,res,next)=>{
     if(!items) return res.status(404).json({success : false, message : "Not Found"});
+    //testing os
+    console.log(os.totalmem())
+    console.log(fs.Dir)
+   
 
     return res.status(200).json(items)
 
