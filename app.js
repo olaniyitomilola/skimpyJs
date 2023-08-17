@@ -1,5 +1,7 @@
 'use-strict';
 
+const start = require('./dbchecks');
+
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3002;
@@ -13,7 +15,19 @@ app.use(express.urlencoded({extended: false}))
 
 app.use('/', router)
 
+//check that all db is set before starting server
 
-app.listen(port,()=>{
-    console.log(`App is listening on port ${port}`)
-})
+async function startApp(){
+    let allset = await start();
+
+    if(allset){
+        app.listen(port,()=>{
+            console.log(`App is listening on port ${port}`)
+        })
+    }else{
+        console.error('Something wrong with db')
+    }
+}
+
+startApp()
+ 
