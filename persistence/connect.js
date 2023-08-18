@@ -1,3 +1,4 @@
+
 const Client = require('pg').Client;
 require('dotenv').config();
 
@@ -6,7 +7,7 @@ const DB = new Client({
     user : 'postgres',
     host: 'localhost',
     password: "",
-    port: 5431,
+    port: 5430,
     
 })
 

@@ -1,36 +1,31 @@
-
-
-
-
-let items = [
-        {name: "Amala", price: 5, unit: "Scoop", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Amala.jpg/1024px-Amala.jpg"}
-        ,{name: "White Rice", price: 2.80, unit: "Spoon", img: "https://static01.nyt.com/images/2018/02/21/dining/00RICEGUIDE8/00RICEGUIDE8-superJumbo.jpg"}
-        ,{name: "Nigerian Jollof Rice", price: 3, unit: "Spoon", img: "https://i.etsystatic.com/43736205/r/il/7a1cd7/5083482431/il_794xN.5083482431_aj9p.jpg"}
-        ,{name: "Stirred Fried Rice", price: 3.5, unit: "Spoon", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA6F4LyczKxY_dkTpu6byAPDuxJqPHrWq4Zw&usqp=CAU"}
-        ,{name: "Another Rice", price: 3.5, unit: "Spoon", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA6F4LyczKxY_dkTpu6byAPDuxJqPHrWq4Zw&usqp=CAU"}
-        ,{name: "Another Rice", price: 3.5, unit: "Spoon", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA6F4LyczKxY_dkTpu6byAPDuxJqPHrWq4Zw&usqp=CAU"}
-        ,null
-
-
-
-
-    ]
+const { dBInsertError } = require("../custom_errors/customErrors");
+const { getAllProducts, getSingleProduct, deleteSingleProduct } = require("./queries");
 
 const getAllItems = async(req,res,next)=>{
-    if(!items) return res.status(404).json({success : false, message : "Not Found"});
-    //testing os
-   
-   
+    let response;
 
-    return res.status(200).json(items)
+    try{
+        let items = await getAllProducts();
+        if(!items) return res.status(404).json({success : false, message : "Not Found"});
+        response =  res.status(200).json(items)
+    }catch(err){
+        if(res instanceof dBInsertError){
+            console.error(err.message)
+            response = res.status(501).json({success : false, message: "Server error"})
+        }else{
+            response = res.status(501).json({success : false, message: "Server error"})
+            console.error(err)
+        }
+    }finally{
+        return response;
+    }
+    
+    
 
 }
 
 const getSingleItem = async(req,res,next)=>{
-    let id = req.params.id;
-    if(!items[parseInt(id)]) return res.status(404).json({success: false, message : `Item with id: ${id} does not exist`})
-
-    return res.status(200).json([items[parseInt(id)]])
+  
 
 }
 
@@ -46,9 +41,38 @@ const editItem = async(req,res,next)=>{
 
 }
 const deleteItem = async(req,res,next)=>{
-    let id = req.params.id;
-    items[parseInt(id)] = null;
-    return  res.status(201).json({message: "Item has been deleted",items})
+         let id = req.params.id;
+         id = parseInt(id);
+         let response;
+
+         //get product before deleting
+
+         try{
+            let product = await getSingleProduct(id);
+            if(!product){
+                response = res.status(404).json({success: false , message: "Not found"})
+            }else{
+                try {
+                    product = await deleteSingleProduct(id);
+                    if(product){
+                        response = res.status(201).json({success : true, message: "Product deleted"})
+                    }else{
+                        response = res.status(501).json({success : false, message: "Server Error"})
+
+                    }                    
+                } catch (error) {
+                    response = res.status(501).json({success : false, message: "Server Error"})             
+            }
+
+         }
+         
+        }catch(error){
+                response = res.status(501).json({success : false, message: "Server Error"})
+
+        }finally{
+            return response;
+        }
+   
 
 }
 
