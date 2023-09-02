@@ -5,7 +5,17 @@ const {v4: uuidv4} = require('uuid');
 
 
 async function createAccount(first_name,last_name,email,password,phone,address){
+   const id = uuidv4();
+    const query = `
+    INSERT INTO users(id, first_name,last_name,password, phone, email, address)
+    VALUES($1,$2,$3,$4,$5,$6,$7);
+    `
+    try{
+        await DB.query(query,[id, first_name, last_name, password, phone, email, address])
 
+    } catch(err){
+        throw new dBInsertError(`Error: ${err}`)
+    }
 }
 
 async function AddProduct(productName, productPrice, img_source){
@@ -86,8 +96,8 @@ async function getNumberOfOrders(){
 }
 async function getSingleUser(user){
     const query = `
-        SELECT * FROM users;
-        WHERE email = $1
+        SELECT * FROM users
+        WHERE email = $1;
     `
     try{
             let result = await DB.query(query,[user]);

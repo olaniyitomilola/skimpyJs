@@ -1,5 +1,7 @@
 const { dBInsertError } = require("../custom_errors/customErrors");
-const {createUser,getAllUsers} = require("../persistence/queries")
+const {createUser,getAllUsers, getSingleUser} = require("../persistence/queries")
+const bcrypt = require('bcrypt');
+const { GenerateToken } = require("../services/TokenService");
 
 
 
@@ -26,35 +28,91 @@ const getAllClients = async(req,res,next)=>{
 
 }
 
-const getSingleUser = async(req,res,next)=>{
-    let id = req.params.id;
-    if(!items[parseInt(id)]) return res.status(404).json({success: false, message : `Item with id: ${id} does not exist`})
 
-    return res.status(200).json([items[parseInt(id)]])
 
-}
+const findUser = async(req,res,next) =>{
+    const {email} = req.params;
 
-const addItem = async(req,res,next)=>{
-    const item = req.body;
+    if(!email) return res.status(400).json({success: false , message: "Bad request"})
+    
 
-    if(!item.name || !item.price || !item.unit || !item.img) return res.status(400).json({success : false, message : "Invalid Input"})
-    items.push(item);
-    return res.status(201).json(items);
-
-}
-const editItem = async(req,res,next)=>{
-
-}
-const deleteItem = async(req,res,next)=>{
-    try{
-         let id = req.params.id;
-        items[parseInt(id)] = null;
-        return  res.status(201).json({message: "Item has been deleted",items})
-    }catch(error){
-        console.error(error)
+    try {
+        const user = await getSingleUser(email);
+        console.log(user)
+        if(user.length > 0) return res.status(200).json({success: false, message: "Account already exists, sign in"})
+        return res.status(200).json({success : true, message: "No user"})
+    } catch (error) {
+     
+            console.log(`Server error: ${error}`)
+            return res.status(500).json({success : false, message: "Unable to Register, try again later"})
     }
-   
-
 }
 
-module.exports = {getAllClients}
+const registerAccount = async(req,res,next) =>{
+    const {firstName, lastName, email,password, phone,address} = req.body;
+    //validate input
+    if(!firstName || !lastName || !email || !password || !phone || !address){
+        console.log("Account validation error")
+        return res.status(400).json({success: false, message: "Registration Error"})
+    }
+  
+
+    try {
+        const salt = await bcrypt.genSalt(10);//saltround
+        const hashedPassword = await bcrypt.hash(password,salt);
+
+        const create = await createUser(firstName,lastName,email,hashedPassword,address,phone);
+
+        if(create){
+            //create token and send back
+            console.log(`New Account registeration : ${email}`)
+          return  res.status(201).json({success : true})
+        }
+         console.log(`Server Error: Unable to create account, Investigated... line 134`)
+          return  res.status(500).json({success : false})
+
+        
+    } catch (error) {
+        console.log(`Server Error: ${error}`)
+          return  res.status(500).json({success : false})
+    }
+}
+
+
+
+const Authenticate = async(req,res,next) =>{
+    const {email,password} = req.body;
+
+
+
+    //validate email input true regex too
+    if(!email || !password) return res.status(400).json({success: false , message: "Bad request: Check Email"})
+    
+
+    try {
+        var user = await getSingleUser(email);
+
+        user = user[0];
+
+        //no need to check unavailable user, handled in the query.
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if(passwordMatch){
+            //generate token here and send
+            const token = GenerateToken(email)
+            return res.status(200).json({success : true, token})
+
+        }else{
+            console.log(`${email}: Wrong password`)
+            return res.status(404).json({success : false, message: "Invalid Email or Password"})
+        }
+
+    } catch (error) {
+            console.log(`${email}: ${error}`)
+            return res.status(404).json({success : false, message: "Invalid Email or Password"})
+     
+    }
+}
+
+
+module.exports = {getAllClients, findUser, registerAccount, Authenticate}
