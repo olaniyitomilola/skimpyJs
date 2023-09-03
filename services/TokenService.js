@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { getSingleUser } = require('../persistence/queries');
 require('dotenv').config();
 
 const secretKey = process.env.TOKEN_KEY;
@@ -20,13 +21,13 @@ const VerifyToken = (req,res,next) =>{
 
     }
     token = token.split(" ")[1];
-    jwt.verify(token,secretKey,(err,decoded) =>{
+    jwt.verify(token,secretKey, async (err,decoded) =>{
         if(err){
             console.log("In error")
             console.log(err)
             return res.status(401).json({message : 'Invalid Token', success: false})
         }
-        req.user = decoded;
+        req.user = await getSingleUser(decoded.email);
         next();
     })
 }

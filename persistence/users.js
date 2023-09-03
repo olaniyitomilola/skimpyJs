@@ -1,5 +1,5 @@
 const { dBInsertError } = require("../custom_errors/customErrors");
-const {createUser,getAllUsers, getSingleUser} = require("../persistence/queries")
+const {createUser,getAllUsers, getSingleUser, getUserOrders, getAllOrderProducts} = require("../persistence/queries")
 const bcrypt = require('bcrypt');
 const { GenerateToken } = require("../services/TokenService");
 
@@ -115,4 +115,43 @@ const Authenticate = async(req,res,next) =>{
 }
 
 
-module.exports = {getAllClients, findUser, registerAccount, Authenticate}
+const myOrders = async (req,res)=>{
+
+    if(!req.user) return res.status(400).json({success : false , message : "Unauthorized"})
+    //verify user
+    let userId = req.user[0];
+
+    try {
+         var myOrders = await getUserOrders(userId.id);
+
+        return res.status(200).json({success: true, message : myOrders})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({success: false, message: "Server error"})
+    }
+   
+
+}
+
+const myOrderProducts = async (req,res)=>{
+    let orderId = req.params.id;
+
+    console.log(req.params);
+
+
+    if(!req.user) return res.status(400).json({success : false , message : "Unauthorized"})
+    //verify user
+
+    try {
+         var myOrders = await getAllOrderProducts(orderId);
+
+        return res.status(200).json({success: true, message : myOrders})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({success: false, message: "Server error"})
+    }
+   
+
+}
+
+module.exports = { myOrderProducts, myOrders,  getAllClients, findUser, registerAccount, Authenticate}

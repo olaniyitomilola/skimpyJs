@@ -1,5 +1,5 @@
 'use-strict';
-const {AddProduct,createUser, getAllProducts,getAllUsers, getNumberOfClients, getNumberOfProducts, getNumberOfOrders, getSingleUser} = require('./persistence/queries');
+const {AddProduct,createUser, getAllProducts,getAllUsers, getNumberOfClients, getNumberOfProducts, getNumberOfOrders, getSingleUser, getAllOrders, getAllOrderProducts} = require('./persistence/queries');
 
 
 const start = require('./dbchecks');
@@ -11,6 +11,7 @@ const cors = require('cors')
 
 const router = require('./API/Controller');
 const { dBInsertError } = require('./custom_errors/customErrors');
+const { alterOrderTable, dropTable } = require('./persistence/connect');
 require('dotenv').config()
 app.use(cors());
 app.use(express.json())
@@ -27,12 +28,6 @@ async function startApp(){
         app.listen(port,()=>{
             console.log(`App is listening on port ${port}`)
         })
-        console.log(await getAllUsers())
-
-	
-
-      
-       
        
     }else{
         console.error('Something wrong with db')

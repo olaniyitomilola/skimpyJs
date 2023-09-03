@@ -1,5 +1,8 @@
 const { dBInsertError } = require("../custom_errors/customErrors");
-const { getAllProducts, getSingleProduct, deleteSingleProduct } = require("./queries");
+const { getAllProducts, getSingleProduct, deleteSingleProduct, createOrder, createOrderProducts } = require("./queries");
+const {v4: uuidv4} = require('uuid');
+
+
 
 const getAllItems = async(req,res,next)=>{
     let response;
@@ -29,14 +32,45 @@ const getSingleItem = async(req,res,next)=>{
 
 }
 
-const addItem = async(req,res,next)=>{
-    const item = req.body;
+const processPayment = async(req,res)=>{
 
-    if(!item.name || !item.price || !item.unit || !item.img) return res.status(400).json({success : false, message : "Invalid Input"})
-    items.push(item);
-    return res.status(201).json(items);
+
+    if(!req.user) return res.status(400).json({success : false , message : "Unauthorized"})
+    //verify user
+    const item = req.body;
+    let totalPrice = 0.00;
+    totalPrice = item.reduce((accumulator, currentValue) => parseFloat(accumulator) + parseFloat(currentValue.price), totalPrice);
+    let orderId = uuidv4()
+
+    let userId = req.user[0]
+
+   
+    var createNewOrder = await createOrder(orderId, userId.id,'Processing',totalPrice);
+
+    if(createNewOrder){
+
+        try {
+                item.forEach((item)=>{
+                createOrderProducts(orderId, item.id, 1)
+                })
+                return res.status(201).json({success : true , message : "Order completed successfully"})
+            
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({success : false , message : "Server error"})
+
+        }
+        
+
+    }
+
+    console.log(totalPrice, orderId)
+
+
 
 }
+
+
 const editItem = async(req,res,next)=>{
 
 }
@@ -76,4 +110,4 @@ const deleteItem = async(req,res,next)=>{
 
 }
 
-module.exports = {getAllItems,getSingleItem,addItem,editItem,deleteItem}
+module.exports = {getAllItems,getSingleItem,processPayment,editItem,deleteItem}

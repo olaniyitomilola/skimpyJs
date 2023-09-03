@@ -38,6 +38,23 @@ async function createSkimpyDB(DB){
     }catch(err){console.error(err)}
 }
 
+
+async function dropTable(){
+    
+
+    const alterQuery = `
+    DROP TABLE IF EXISTS orders CASCADE;
+  `;
+
+  try {
+    await DB.query(alterQuery);
+    console.log('Table "courses" deleted');
+  } catch (error) {
+    console.error('Error:', error);
+  }
+
+}
+
 //check if table exists, we are going to run this on all our tables
 
 async function checkIfTableExists(table,DB){
@@ -109,10 +126,12 @@ async function createOrderTable(DB){
     //SERIAL is Auto-Increment int in postgres
      const query = `
         CREATE TABLE IF NOT EXISTS orders(
-            id SERIAL PRIMARY KEY NOT NULL,
+            id UUID PRIMARY KEY NOT NULL,
             user_id UUID,
+        
             order_status VARCHAR(255),
             total_price NUMERIC(10,2),
+
             order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
@@ -133,7 +152,7 @@ async function createOrderProductsTable(DB){
     const query = `
         CREATE TABLE IF NOT EXISTS order_products(
             id SERIAL PRIMARY KEY NOT NULL,
-            order_id INT,
+            order_id UUID,
             product_id INT,
             quantity INT,
             FOREIGN KEY(order_id) REFERENCES orders(id),
@@ -152,4 +171,4 @@ async function createOrderProductsTable(DB){
 
 //remoeve event booking functionality for now
 
-module.exports = {DB,checkIfDbExist,createSkimpyDB,checkIfTableExists,createUserTable,createOrderProductsTable,createOrderTable,createProductTable};
+module.exports = {DB,checkIfDbExist,createSkimpyDB,checkIfTableExists,createUserTable,createOrderProductsTable,createOrderTable,createProductTable, dropTable};

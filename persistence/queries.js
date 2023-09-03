@@ -151,4 +151,84 @@ async function deleteSingleProduct(itemId){
 }
 
 
-module.exports = {deleteSingleProduct, getSingleUser,getAllUsers,createUser,AddProduct,getAllProducts,getNumberOfClients,getNumberOfProducts,getNumberOfOrders, getSingleProduct}
+
+async function createOrder(guid, user_id, order_status, total_price){
+    const query = `
+        INSERT INTO orders(id,user_id,order_status,total_price)
+        VALUES ($1,$2,$3,$4)
+    `
+    try{
+            await DB.query(query,[guid, user_id , order_status, total_price]);
+            return true
+
+    } catch(err){
+        console.log(err)
+        throw new dBInsertError('Unable to delete');
+        
+    }
+}
+
+
+async function createOrderProducts(order_id, product_id,quantity){
+    const query = `
+        INSERT INTO order_products(order_id,product_id , quantity)
+        VALUES ($1,$2,$3)
+    `
+    try{
+            await DB.query(query,[order_id, product_id, quantity]);
+            return true
+
+    } catch(err){
+        console.log(err)
+        throw new dBInsertError('Unable to add product');
+        
+    }
+}
+
+async function getAllOrders(){
+    const query = `
+        SELECT * FROM orders;
+    `
+    try{
+            let result = await DB.query(query);
+            return result.rows;
+
+    } catch(err){
+        throw new dBInsertError('unable to fetch orders')
+    }
+}
+
+
+async function getUserOrders(user_id){
+    const query = `
+        SELECT * FROM orders
+        WHERE user_id = $1;
+    `
+    try{
+            let result = await DB.query(query,[user_id]);
+            return result.rows;
+
+    } catch(err){
+        throw new dBInsertError('unable to fetch orders')
+    }
+}
+
+async function getAllOrderProducts(order_id){
+    const query = `
+        SELECT p.product_name, p.img_sources, p.price
+        FROM order_products op
+        JOIN products p ON op.product_id = p.id
+        WHERE order_id = $1;
+    `;
+    try{
+            let result = await DB.query(query,[order_id]);
+            return result.rows;
+
+    } catch(err){
+        console.log(err)
+        throw new dBInsertError('unable to fetch order products')
+    }
+}
+
+
+module.exports = {deleteSingleProduct, getSingleUser,getAllUsers,createUser,AddProduct,getAllProducts,getNumberOfClients,getNumberOfProducts,getNumberOfOrders, getSingleProduct , createOrder, createOrderProducts, getAllOrders, getAllOrderProducts, getUserOrders}
