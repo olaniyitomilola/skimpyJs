@@ -86,7 +86,9 @@ async function createUserTable(DB){
             password VARCHAR(255),
             phone VARCHAR(20),
             email VARCHAR(255),
-            address VARCHAR(255)
+            address VARCHAR(255),
+            dateCreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
         );
     `;
     try{
@@ -99,6 +101,7 @@ async function createUserTable(DB){
     
 
 }
+
 
 
 
@@ -169,6 +172,5 @@ async function createOrderProductsTable(DB){
     
 }
 
-//remoeve event booking functionality for now
 
-module.exports = {DB,checkIfDbExist,createSkimpyDB,checkIfTableExists,createUserTable,createOrderProductsTable,createOrderTable,createProductTable, dropTable};
+module.exports = {DB, checkIfDbExist,createSkimpyDB,checkIfTableExists,createUserTable,createOrderProductsTable,createOrderTable,createProductTable, dropTable};

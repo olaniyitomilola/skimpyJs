@@ -231,4 +231,113 @@ async function getAllOrderProducts(order_id){
 }
 
 
-module.exports = {deleteSingleProduct, getSingleUser,getAllUsers,createUser,AddProduct,getAllProducts,getNumberOfClients,getNumberOfProducts,getNumberOfOrders, getSingleProduct , createOrder, createOrderProducts, getAllOrders, getAllOrderProducts, getUserOrders}
+///BUSINESS INTELLIGENCE QUERIES
+/// 
+async function getAllSales(){
+    const query = `
+        SELECT SUM(total_price) AS total_price_sum
+        FROM orders;
+
+    `
+    try{
+            let result = await DB.query(query);
+            return result.rows;
+
+    } catch(err){
+        throw new dBInsertError('unable to fetch sales')
+    }
+}
+
+async function getThisMonthSales(){
+    const query = `
+        SELECT SUM(total_price) AS present_month_total_price_sum
+        FROM orders
+        WHERE EXTRACT(MONTH FROM order_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+        AND EXTRACT(YEAR FROM order_date) = EXTRACT(YEAR FROM CURRENT_DATE);
+    `
+    try{
+            let result = await DB.query(query);
+            return result.rows;
+
+    } catch(err){
+        throw new dBInsertError('unable to fetch sales')
+    }
+}
+
+async function getPreviousMonthSales(){
+    const query = `
+       SELECT SUM(total_price) AS previous_month_total_price_sum
+        FROM orders
+        WHERE EXTRACT(MONTH FROM order_date) = EXTRACT(MONTH FROM CURRENT_DATE - INTERVAL '1 month')
+        AND EXTRACT(YEAR FROM order_date) = EXTRACT(YEAR FROM CURRENT_DATE - INTERVAL '1 month');
+
+    `
+    try{
+            let result = await DB.query(query);
+            return result.rows;
+
+    } catch(err){
+        throw new dBInsertError('unable to fetch sales')
+    }
+}
+
+
+
+async function getTopSellingProductByQuantity(){
+    const query = `
+       SELECT p.product_name, top_selling.total_quantity
+        FROM (
+            SELECT product_id, SUM(quantity) AS total_quantity
+            FROM order_products
+            GROUP BY product_id
+            ORDER BY total_quantity DESC
+            LIMIT 3
+        ) top_selling
+        JOIN products p ON top_selling.product_id = p.id
+        ORDER BY total_quantity DESC;
+
+
+
+    `
+    try{
+            let result = await DB.query(query);
+            return result.rows;
+
+    } catch(err){
+        throw new dBInsertError('unable to fetch sales' + err)
+    }
+}
+
+
+async function getTopBuyers(){
+    const query = `
+       SELECT u.first_name, u.last_name, SUM(top_users.total_price) AS total_spent
+        FROM (
+            SELECT user_id, SUM(total_price) AS total_price
+            FROM orders
+            GROUP BY user_id
+            ORDER BY total_price DESC
+            
+        ) top_users
+        JOIN users u ON top_users.user_id = u.id
+        GROUP BY u.first_name, u.last_name
+        ORDER BY total_spent DESC
+        LIMIT 3;
+
+
+
+
+    `
+    try{
+            let result = await DB.query(query);
+            return result.rows;
+
+    } catch(err){
+        throw new dBInsertError('unable to fetch sales' + err)
+    }
+}
+
+
+
+
+module.exports = { getTopBuyers, getTopSellingProductByQuantity, getPreviousMonthSales, getThisMonthSales, getAllSales, deleteSingleProduct, getSingleUser,getAllUsers,createUser,AddProduct,getAllProducts,getNumberOfClients,getNumberOfProducts,getNumberOfOrders, getSingleProduct , createOrder, createOrderProducts, getAllOrders, getAllOrderProducts, getUserOrders}

@@ -1,5 +1,5 @@
 const { dBInsertError } = require("../custom_errors/customErrors");
-const { getAllProducts, getSingleProduct, deleteSingleProduct, createOrder, createOrderProducts } = require("./queries");
+const { getAllProducts, getSingleProduct, deleteSingleProduct, createOrder, createOrderProducts, getAllSales, getThisMonthSales, getPreviousMonthSales, getTopSellingProductByQuantity, getTopBuyers } = require("./queries");
 const {v4: uuidv4} = require('uuid');
 
 
@@ -27,10 +27,6 @@ const getAllItems = async(req,res,next)=>{
 
 }
 
-const getSingleItem = async(req,res,next)=>{
-  
-
-}
 
 const processPayment = async(req,res)=>{
 
@@ -110,4 +106,53 @@ const deleteItem = async(req,res,next)=>{
 
 }
 
-module.exports = {getAllItems,getSingleItem,processPayment,editItem,deleteItem}
+const getSalesInfo = async(req,res) =>{
+    try{
+        let allSales = await getAllSales();
+        let thisMonth = await getThisMonthSales();
+
+        let prevMonth = await getPreviousMonthSales();
+
+        return res.status(200).json({
+            success: true,
+            message: {
+                total : allSales[0].total_price_sum,
+                current: thisMonth[0].present_month_total_price_sum,
+                previous: prevMonth[0].previous_month_total_price_sum
+            }
+        })
+
+    }catch(error){
+        console.log(error)
+        return res.status(500).json({success : false , message: 'Server Error'})
+    }
+}
+
+
+const getTopSellingItem = async(req,res) =>{
+    try{
+        let byQuantity = await getTopSellingProductByQuantity();
+
+        //top buyer
+
+        let topBuyer = await getTopBuyers()
+
+        //byPrice
+       // let thisMonth = await getThisMonthSales();
+
+        console.log(byQuantity)
+        return res.status(200).json({
+            success: true,
+            message: {
+                byQuantity,
+                topBuyer
+            }
+        })
+
+    }catch(error){
+        console.log(error)
+        return res.status(500).json({success : false , message: 'Server Error'})
+    }
+}
+
+module.exports = { getTopSellingItem, getSalesInfo, getAllItems,processPayment,editItem,deleteItem}
