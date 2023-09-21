@@ -87,7 +87,7 @@ async function createUserTable(DB){
             phone VARCHAR(20),
             email VARCHAR(255),
             address VARCHAR(255),
-            dateCreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            dateCreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
         );
     `;
@@ -101,9 +101,6 @@ async function createUserTable(DB){
     
 
 }
-
-
-
 
 async function createProductTable(DB){
     const query = `

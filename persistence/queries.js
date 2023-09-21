@@ -70,6 +70,22 @@ async function getNumberOfClients(){
 }
 
 
+async function getMonthRegistration(){
+    const query = `
+        SELECT COUNT(*) FROM users
+          WHERE EXTRACT(MONTH FROM dateCreated) = EXTRACT(MONTH FROM CURRENT_DATE)
+        AND EXTRACT(YEAR FROM dateCreated) = EXTRACT(YEAR FROM CURRENT_DATE);
+    `
+    try{
+            let result = await DB.query(query);
+            return result.rows[0].count;
+
+    } catch(err){
+        console.error(err)
+    }
+}
+
+
 async function getNumberOfProducts(){
     const query = `
         SELECT COUNT(*) FROM products;
@@ -187,14 +203,18 @@ async function createOrderProducts(order_id, product_id,quantity){
 
 async function getAllOrders(){
     const query = `
-        SELECT * FROM orders;
+       SELECT ord.*, usr.first_name, usr.last_name, usr.address
+        FROM orders ord
+        JOIN users usr
+        ON ord.user_id = usr.id;
+
     `
     try{
             let result = await DB.query(query);
             return result.rows;
 
     } catch(err){
-        throw new dBInsertError('unable to fetch orders')
+        throw new dBInsertError(err)
     }
 }
 
@@ -206,6 +226,31 @@ async function getUserOrders(user_id){
     `
     try{
             let result = await DB.query(query,[user_id]);
+            return result.rows;
+
+    } catch(err){
+        throw new dBInsertError('unable to fetch orders')
+    }
+}
+
+
+async function getUserOrder(){
+    const query = `
+        SELECT
+    u.id AS user_id,
+    u.first_name,
+    u.last_name,
+    u.address,
+    COUNT(o.id) AS order_count
+    FROM  users u
+    LEFT JOIN orders o ON u.id = o.user_id
+    GROUP BY u.id, u.first_name, u.last_name, u.address
+    ORDER BY order_count DESC
+    ;
+
+    `
+    try{
+            let result = await DB.query(query);
             return result.rows;
 
     } catch(err){
@@ -323,10 +368,6 @@ async function getTopBuyers(){
         GROUP BY u.first_name, u.last_name
         ORDER BY total_spent DESC
         LIMIT 3;
-
-
-
-
     `
     try{
             let result = await DB.query(query);
@@ -340,4 +381,4 @@ async function getTopBuyers(){
 
 
 
-module.exports = { getTopBuyers, getTopSellingProductByQuantity, getPreviousMonthSales, getThisMonthSales, getAllSales, deleteSingleProduct, getSingleUser,getAllUsers,createUser,AddProduct,getAllProducts,getNumberOfClients,getNumberOfProducts,getNumberOfOrders, getSingleProduct , createOrder, createOrderProducts, getAllOrders, getAllOrderProducts, getUserOrders}
+module.exports = { getUserOrder, getMonthRegistration, getTopBuyers, getTopSellingProductByQuantity, getPreviousMonthSales, getThisMonthSales, getAllSales, deleteSingleProduct, getSingleUser,getAllUsers,createUser,AddProduct,getAllProducts,getNumberOfClients,getNumberOfProducts,getNumberOfOrders, getSingleProduct , createOrder, createOrderProducts, getAllOrders, getAllOrderProducts, getUserOrders}

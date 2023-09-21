@@ -1,5 +1,5 @@
 'use-strict';
-const {AddProduct,createUser, getAllProducts,getAllUsers, getNumberOfClients, getNumberOfProducts, getNumberOfOrders, getSingleUser, getAllOrders, getAllOrderProducts, getAllSales, getThisMonthSales, getPreviousMonthSales, getTopSellingProductByPrice, getTopBuyers} = require('./persistence/queries');
+const {AddProduct,createUser, getAllProducts,getAllUsers, getNumberOfClients, getNumberOfProducts, getNumberOfOrders, getSingleUser, getAllOrders, getAllOrderProducts, getAllSales, getThisMonthSales, getPreviousMonthSales, getTopSellingProductByPrice, getTopBuyers, getUserOrder} = require('./persistence/queries');
 
 
 const start = require('./dbchecks');
@@ -25,8 +25,9 @@ async function startApp(){
     let allset = await start();
 
     if(allset){
-        app.listen(port,()=>{
+        app.listen(port, async ()=>{
             console.log(`App is listening on port ${port}`)
+            console.log(await getUserOrder())
         })
        
     }else{

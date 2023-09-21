@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 
-const {getAllItems,getSingleItem,addItem,editItem,deleteItem, processPayment, getSalesInfo, getTopSellingItem} = require('../persistence/Items');
-const {getAllClients, registerAccount, findUser, Authenticate, myOrders, myOrderProducts} = require('../persistence/users');
+const {getAllItems,getSingleItem,addItem,editItem,deleteItem, processPayment, getSalesInfo, getTopSellingItem, getUsersInfo} = require('../persistence/Items');
+const {getAllClients, registerAccount, findUser, Authenticate, myOrders, myOrderProducts, AllOrders, theOrders} = require('../persistence/users');
 const { VerifyToken, homeVerify } = require('../services/TokenService');
 router.route('/products').get(getAllItems);
 router.route('/users').get(getAllClients).post(registerAccount)
@@ -16,6 +16,10 @@ router.route('/orders').get(VerifyToken,myOrders);
 router.route('/orders/:id').get(VerifyToken, myOrderProducts);
 router.route('/admin/allsales').get(getSalesInfo);
 router.route('/admin/topselling').get(getTopSellingItem);
+router.route('/admin/usersinfo').get(getUsersInfo)
+router.route('/admin/orders').get(AllOrders);
+router.route('/admin/userorders').get(theOrders);
+
 
 
 

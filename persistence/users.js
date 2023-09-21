@@ -1,5 +1,5 @@
 const { dBInsertError } = require("../custom_errors/customErrors");
-const {createUser,getAllUsers, getSingleUser, getUserOrders, getAllOrderProducts} = require("../persistence/queries")
+const {createUser,getAllUsers, getSingleUser, getUserOrders, getAllOrderProducts, getAllOrders, getUserOrder} = require("../persistence/queries")
 const bcrypt = require('bcrypt');
 const { GenerateToken } = require("../services/TokenService");
 
@@ -133,6 +133,38 @@ const myOrders = async (req,res)=>{
 
 }
 
+
+const theOrders = async (req,res)=>{
+
+    try {
+         var myOrders = await getUserOrder();
+
+        return res.status(200).json({success: true, message : myOrders})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({success: false, message: "Server error"})
+    }
+   
+
+}
+
+
+
+const AllOrders = async (req,res)=>{
+
+
+    try {
+         var myOrders = await getAllOrders();
+
+        return res.status(200).json({success: true, message : myOrders})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({success: false, message: "Server error"})
+    }
+   
+
+}
+
 const myOrderProducts = async (req,res)=>{
     let orderId = req.params.id;
 
@@ -154,4 +186,6 @@ const myOrderProducts = async (req,res)=>{
 
 }
 
-module.exports = { myOrderProducts, myOrders,  getAllClients, findUser, registerAccount, Authenticate}
+
+
+module.exports = { theOrders, AllOrders, myOrderProducts, myOrders,  getAllClients, findUser, registerAccount, Authenticate}

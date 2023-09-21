@@ -1,5 +1,5 @@
 const { dBInsertError } = require("../custom_errors/customErrors");
-const { getAllProducts, getSingleProduct, deleteSingleProduct, createOrder, createOrderProducts, getAllSales, getThisMonthSales, getPreviousMonthSales, getTopSellingProductByQuantity, getTopBuyers } = require("./queries");
+const { getAllProducts, getSingleProduct, deleteSingleProduct, createOrder, createOrderProducts, getAllSales, getThisMonthSales, getPreviousMonthSales, getTopSellingProductByQuantity, getTopBuyers, getAllUsers, getMonthRegistration } = require("./queries");
 const {v4: uuidv4} = require('uuid');
 
 
@@ -140,7 +140,6 @@ const getTopSellingItem = async(req,res) =>{
         //byPrice
        // let thisMonth = await getThisMonthSales();
 
-        console.log(byQuantity)
         return res.status(200).json({
             success: true,
             message: {
@@ -155,4 +154,27 @@ const getTopSellingItem = async(req,res) =>{
     }
 }
 
-module.exports = { getTopSellingItem, getSalesInfo, getAllItems,processPayment,editItem,deleteItem}
+const getUsersInfo = async(req,res) =>{
+    try{
+        let allUsers = await getAllUsers();
+
+        let monthUsers = await getMonthRegistration()
+
+        //byPrice
+       // let thisMonth = await getThisMonthSales();
+
+        return res.status(200).json({
+            success: true,
+            message: {
+                allUsers,
+                monthUsers
+            }
+        })
+
+    }catch(error){
+        console.log(error)
+        return res.status(500).json({success : false , message: 'Server Error'})
+    }
+}
+
+module.exports = { getUsersInfo, getTopSellingItem, getSalesInfo, getAllItems,processPayment,editItem,deleteItem}
